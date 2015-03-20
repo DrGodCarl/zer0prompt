@@ -6,6 +6,7 @@
 
 # grab user config files via import
 source ~/zer0prompt/zer0prompt.conf
+source ~/.git-prompt.sh
 
 # use bash builtin checkwinsize option for terminals which fail to properly
 # set the $COLUMNS variable. (bug workaround)
@@ -41,11 +42,24 @@ function pre_prompt {
   [ "$ZEXIT" = "0" ] && ZEXIT=""
 
   ZPWD=${PWD/#$HOME/\~}  # sorten home dir to ~
+  ZGIT=$(__git_ps1)
+  local gitlength=${#ZGIT}
+  ZGIT=${ZGIT:2:($gitlength-3)} # get rid of " (" and ")"
+  local gitlength=${#ZGIT}
+
+  ZGITOPEN=""
+  ZGITCLOSE=""
 
   # set length of our important info
-  local infolength="$(whoami)@$(hostname):$(basename $(tty))$ZPWD"
+  local infolength="$(whoami)$ZPWD$ZGIT"
+  local gitlength=${#ZGIT}
   # set length of our graphics
   local gfxlength=23
+  if [ "$gitlength" -gt "0" ]; then
+    gfxlength=26
+    ZGITOPEN=$zg1$zg4
+    ZGITCLOSE=$zg5
+  fi
 
   # construct ZFILL size to fill terminal width (minus info/gfx lengths).
   local fillsize
@@ -102,11 +116,10 @@ function zer0prompt {
 
 # standard prompt
 PS1="${TITLEBAR}\
-$zc1$zci$zg2$zg1$zc3$zg1$zc4$zci$zg1$zg4$zi0\u$zi1@\h:\l$zc4$zci$zg5$zg1$zc2$zci$zg1$zg1$zc4$zci\
-\$ZFILL$zc3$zg1$zg1$zg1$zg1$zc1$zg1$zg1$zg1$zc3$zg1$zg1$zc4$zci$zg1$zg4$zi2\
+$zc1$zci$zg2$zg1$zc3$zg1$zc4$zci$zg1$zg4$zi0\u$zi1$zc4$zci$zg5$zg1$zc2$zci$zg1$zg1$zc4$zci\
+\$ZGITOPEN$zi6\$ZGIT$zc4$zci\$ZGITCLOSE\$ZFILL$zc3$zg1$zg1$zg1$zg1$zc1$zg1$zg1$zg1$zc3$zg1$zg1$zc4$zci$zg1$zg4$zi2\
 \$ZPWD$zc4$zci$zg5$zg1$zc2$zci$zg1
-$zc3$zg3$zc4$zci$zg1$zg4$zi3\D{$ztime}$zci $zi5\\\$$zc4$zci$zg5$zi4\
-\$ZEXIT$zc2$zci$zg1$zc3$zg6$zc0 "
+$zc3$zg3$zc4$zci$zg1$zg4$zi3\D{$ztime}$zci $zi5\\\$$zc4$zci\$ZEXIT$zc2$zci$zg1$zc3$zg6$zc0 "
 
 # continuation prompt
 PS2="$zc3$zci$zg3$zc4$zci$zg1$zg4$zi5\\\$$zc4$zci$zg5$zc2$zci$zg1$zc3$zg6$zc0 "
